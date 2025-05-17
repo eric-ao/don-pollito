@@ -2,6 +2,7 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const registerCommands = require('./utils/commandsManager');
+const initDatabase = require('./db/database')
 
 
 
@@ -17,6 +18,11 @@ client.commands = new Collection();
 registerCommands(client);
 
 
+(async () => {
+    client.db = await initDatabase();
+    console.log("✅ Database ready");
+})();
+
 
 client.on('interactionCreate', async interaction => {
     if(!interaction.isChatInputCommand()) return;
@@ -28,7 +34,11 @@ client.on('interactionCreate', async interaction => {
         await command.execute(interaction);
     } catch (err) {
         console.error(err);
-        await interaction.reply({ content: '❌ Error trying to execute the command.', ephemeral: true });
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply({ content: '❌ Error trying to execute the command.', ephemeral: true });
+        } else {
+            await interaction.followUp({ content: '❌ Internal error.', ephemeral: true });
+        }
     }
 })
 
