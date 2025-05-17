@@ -10,7 +10,7 @@ module.exports = {
 
         let userData = await db.get('SELECT * FROM chips WHERE user_id = ?', [userId])
         if(!userData) {
-            await db.run('INSERT INTO chips (user_id, chips) VALUES (?, ?)', [userId], 0);
+            await db.run('INSERT INTO chips (user_id, chips) VALUES (?, ?)', [userId, 0]);
             userData = { user_id: userId, chips: 0};
         }
 
