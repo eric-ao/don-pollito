@@ -2,7 +2,7 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const registerCommands = require('./utils/commandsManager');
-const initDatabase = require('./db/database')
+const { initDatabase, giveChips } = require('./db/database')
 
 
 
@@ -42,8 +42,44 @@ client.on('interactionCreate', async interaction => {
     }
 })
 
+client.on('messageCreate', async message => {
+    if (message.author.bot || !message.guild) return;
+
+    try {
+        client.db.addChips(message.author.id, 1);
+    } catch (err) {
+        console.error(`❌ Error trying to give chips to ${message.author.id}:`, err)
+    }
+})
+
 client.once('ready', () => {
     console.log(`🤖 Bot connected as ${client.user.tag}`)
+
+    setInterval(async () => {
+
+        for (const [guildId, guild] of client.guilds.cache) {
+            for (const [, channel] of guild.channels.cache) {
+                if (channel.type === 2) {
+
+                    const members = channel.members.filter(m => !m.user.bot);
+                    const count = members.size;
+
+                    if (count > 0) {
+                        for (const [id] of members) {
+                            const chips = 10 * (1 + (count-1) / 10);
+
+                            try {
+                                await client.db.addChips(id, chips);
+                            } catch (err) {
+                                console.error(`❌ Error trying to give chips to ${id}:`, err)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }, 60_000);
 })
 
 client.login(process.env.DISCORD_TOKEN)
