@@ -1,7 +1,7 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const registerCommands = require('./utils/commandsManager')
+const registerCommands = require('./utils/commandsManager');
 
 
 
