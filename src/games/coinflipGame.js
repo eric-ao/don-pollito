@@ -25,12 +25,12 @@ async function coinflipGame(interaction) {
     let result = '';
     let color = '';
     if (win) {
-        await interaction.client.db.addChips(interaction.client.id, bet * 2);
-        await interaction.client.db.registerStats('coinflip', interaction.client.id, bet, 0);
-        result = `${EMOJIS.win_huge} You won **${bet * 2} chips**.`;
+        await interaction.client.db.addChips(interaction.user.id, bet * 2);
+        await interaction.client.db.registerStats('coinflip', interaction.user.id, bet, 0);
+        result = `${EMOJIS.win_huge} You won **${bet} chips**.`;
         color = 'Green';
     } else {
-        await interaction.client.db.registerStats('coinflip', interaction.client.id, 0, bet);
+        await interaction.client.db.registerStats('coinflip', interaction.user.id, 0, bet);
         result = `${EMOJIS.lose} You lost **${bet} chips**.`;
         color = 'Red';
     }

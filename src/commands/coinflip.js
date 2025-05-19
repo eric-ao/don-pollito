@@ -10,7 +10,7 @@ module.exports = {
             .setCustomId(`coinflip_modal_${interaction.user.id}`)
             .setTitle('🎰 Choose your bet')
 
-        const betInput = new TextInputBuilder()
+        const input = new TextInputBuilder()
             .setCustomId('bet')
             .setLabel(`You have ${chipsAmount} chips`)
             .setStyle(TextInputStyle.Short)
