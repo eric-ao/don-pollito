@@ -20,6 +20,24 @@ async function initDatabase() {
         )
     }
 
+    db.getChips = async (userId) => {
+        const result = await db.get('SELECT chips FROM chips WHERE user_id = ?', [userId]);
+
+        if (!result) {
+            await db.run('INSERT INTO chips (user_id, chips) VALUES (?, 0)', [userId]);
+            return 0;
+        }
+
+        return result.chips;
+    }
+
+    db.removeChips = async (userId, amount) => {
+        return db.run(
+            'UPDATE chips SET chips = chips - ? WHERE user_id = ?',
+            [amount, userId]
+        )
+    }
+
 
     return db;
 }

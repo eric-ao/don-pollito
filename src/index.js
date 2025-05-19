@@ -2,7 +2,8 @@ require('dotenv').config({ path: __dirname + '/../.env' });
 
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const registerCommands = require('./utils/commandsManager');
-const { initDatabase, giveChips } = require('./db/database')
+const { initDatabase } = require('./db/database')
+const { blackjackGame, blackjackGameButton } = require('./games/blackjackGame')
 
 
 
@@ -25,19 +26,40 @@ registerCommands(client);
 
 
 client.on('interactionCreate', async interaction => {
-    if(!interaction.isChatInputCommand()) return;
+    if (interaction.isModalSubmit()) {
+        //Player is betting on a game
+        if(interaction.customId.startsWith('blackjack_modal_')) {
+            return blackjackGame(interaction);
+        }
 
-    const command = client.commands.get(interaction.commandName);
-    if(!command) return;
+    } else if (interaction.isButton()) {
+        //Check that the user that started the game has clicked the button
+        const [prefix, action, userId] = interaction.customId.split('_');
+        if (interaction.user.id !== userId) {
+            return interaction.reply({ content: "❌ You cannot play someone else's game.", ephemeral: true });
+        }
 
-    try {
-        await command.execute(interaction);
-    } catch (err) {
-        console.error(err);
-        if (!interaction.replied && !interaction.deferred) {
-            await interaction.reply({ content: '❌ Error trying to execute the command.', ephemeral: true });
-        } else {
-            await interaction.followUp({ content: '❌ Internal error.', ephemeral: true });
+
+        if(prefix === 'blackjack') {
+            blackjackGameButton(interaction, action);
+        }
+
+    } else {
+        //Probably a command
+        if(!interaction.isChatInputCommand()) return;
+
+        const command = client.commands.get(interaction.commandName);
+        if(!command) return;
+
+        try {
+            await command.execute(interaction);
+        } catch (err) {
+            console.error(err);
+            if (!interaction.replied && !interaction.deferred) {
+                await interaction.reply({ content: '❌ Error trying to execute the command.', ephemeral: true });
+            } else {
+                await interaction.followUp({ content: '❌ Internal error.', ephemeral: true });
+            }
         }
     }
 })

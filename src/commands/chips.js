@@ -1,4 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
+const EMOJIS = require('../utils/emojis')
 
 module.exports = {
     data: new SlashCommandBuilder().setName('chips').setDescription('Get your chips amount'),
@@ -14,6 +15,10 @@ module.exports = {
             userData = { user_id: userId, chips: 0};
         }
 
-        return await interaction.reply(`💰 You have ${userData.chips} chips.`)
+        const embed = new EmbedBuilder()
+            .setColor(0x747475) // gris oscuro (tono de embeds neutrales de Discord)
+            .setDescription(`You have **${userData.chips} chips** ${EMOJIS.chips}`)
+
+        return await interaction.reply({ embeds: [embed] });
     }
 }
