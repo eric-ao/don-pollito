@@ -68,6 +68,10 @@ async function initDatabase() {
             `, [userId, won, lost, won, lost]);
     }
 
+    db.getStats = async (game, userId) => {
+        return db.get(`SELECT * FROM ${game}_stats WHERE user_id = ?`, [userId])
+    }
+
 
     return db;
 }
