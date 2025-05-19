@@ -11,6 +11,22 @@ async function initDatabase() {
     })
 
     await db.exec('CREATE TABLE IF NOT EXISTS chips (user_id TEXT PRIMARY KEY, chips INTEGER DEFAULT 0)')
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS blackjack_stats (
+          user_id TEXT PRIMARY KEY,
+          games_played INTEGER DEFAULT 0,
+          chips_won INTEGER DEFAULT 0,
+          chips_lost INTEGER DEFAULT 0
+        )
+    `);
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS coinflip_stats (
+          user_id TEXT PRIMARY KEY,
+          games_played INTEGER DEFAULT 0,
+          chips_won INTEGER DEFAULT 0,
+          chips_lost INTEGER DEFAULT 0
+        )
+    `);
 
 
     db.addChips = async (userId, amount) => {
@@ -36,6 +52,20 @@ async function initDatabase() {
             'UPDATE chips SET chips = chips - ? WHERE user_id = ?',
             [amount, userId]
         )
+    }
+
+    db.registerStats = async (game, userId, won, lost) => {
+        const table = `${game}_stats`;
+
+        await db.run(`
+            INSERT INTO ${table} (user_id, games_played, chips_won, chips_lost)
+            VALUES (?, 1, ?, ?)
+            ON CONFLICT(user_id)
+            DO UPDATE SET
+              games_played = games_played + 1,
+              chips_won = chips_won + ?,
+              chips_lost = chips_lost + ?
+            `, [userId, won, lost, won, lost]);
     }
 
 

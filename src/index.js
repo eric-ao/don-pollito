@@ -4,6 +4,7 @@ const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const registerCommands = require('./utils/commandsManager');
 const { initDatabase } = require('./db/database')
 const { blackjackGame, blackjackGameButton } = require('./games/blackjackGame')
+const {coinflipGame} = require("./games/coinflipGame");
 
 
 
@@ -30,6 +31,8 @@ client.on('interactionCreate', async interaction => {
         //Player is betting on a game
         if(interaction.customId.startsWith('blackjack_modal_')) {
             return blackjackGame(interaction);
+        } else if (interaction.customId.startsWith('coinflip_modal_')) {
+            return coinflipGame(interaction);
         }
 
     } else if (interaction.isButton()) {
@@ -38,7 +41,6 @@ client.on('interactionCreate', async interaction => {
         if (interaction.user.id !== userId) {
             return interaction.reply({ content: "❌ You cannot play someone else's game.", ephemeral: true });
         }
-
 
         if(prefix === 'blackjack') {
             blackjackGameButton(interaction, action);

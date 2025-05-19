@@ -92,6 +92,7 @@ async function hit(interaction, game, bet) {
     if (playerScore > 21) {
         interaction.client.blackjackGames.delete(interaction.user.id);
         embed.setColor('Red').setFooter({ text: `${EMOJIS.lose} You went over 21. You lost ${bet} chips.` })
+        await interaction.client.db.registerStats('blackjack', interaction.client.id, 0, bet);
         await interaction.update({ embeds: [embed], components: []})
     } else {
         const updatedButtons = new ActionRowBuilder().addComponents(
@@ -124,18 +125,22 @@ async function stand(interaction, game, bet) {
     if (playerScore > 21) {
         result = `${EMOJIS.lose} You went over 21. You lost ${bet} chips.`;
         color = 'Red';
+        await interaction.client.db.registerStats('blackjack', interaction.client.id, 0, bet);
     }
     else if (dealerScore > 21 || playerScore > dealerScore) {
-        result = `${EMOJIS.win_huge} You won ${bet} chips!`;
+        result = `${EMOJIS.win_huge} You won **${bet} chips**!`;
         color = 'Green';
         await interaction.client.db.addChips(interaction.user.id, bet * 2);
+        await interaction.client.db.registerStats('blackjack', interaction.client.id, bet, 0);
     } else if (dealerScore === playerScore) {
         result =  `${EMOJIS.draw} Draw. You recover your chips.`;
         color = 'Yellow'
         await interaction.client.db.addChips(interaction.user.id, bet);
+        await interaction.client.db.registerStats('blackjack', interaction.client.id, 0, 0);
     } else {
-        result = `${EMOJIS.lose} You lost ${bet} chips.`;
+        result = `${EMOJIS.lose} You lost **${bet} chips**.`;
         color = 'Red';
+        await interaction.client.db.registerStats('blackjack', interaction.client.id, 0, bet);
     }
 
     interaction.client.blackjackGames.delete(interaction.user.id);
