@@ -5,6 +5,8 @@ const registerCommands = require('./utils/commandsManager');
 const { initDatabase } = require('./db/database')
 const { blackjackGame, blackjackGameButton } = require('./games/blackjackGame')
 const {coinflipGame} = require("./games/coinflipGame");
+const {slotsSetupHandler} = require("./games/slotsSetup");
+const { handleSlotPlay } = require("./games/slotsGame")
 
 
 
@@ -33,12 +35,20 @@ client.on('interactionCreate', async interaction => {
             return blackjackGame(interaction);
         } else if (interaction.customId.startsWith('coinflip_modal_')) {
             return coinflipGame(interaction);
+        } else if (interaction.customId.startsWith('slots_config_modal_')) {
+            return slotsSetupHandler(interaction);
         }
 
     } else if (interaction.isButton()) {
-        //Check that the user that started the game has clicked the button
+
         const [prefix, action, userId] = interaction.customId.split('_');
-        if (interaction.user.id !== userId) {
+
+        //If it's a slot machine, we dont check same userId.
+        if(prefix === 'slot') {
+            handleSlotPlay(interaction);
+        }
+        //Check that the user that started the game has clicked the button
+        else if (interaction.user.id !== userId) {
             return interaction.reply({ content: "❌ You cannot play someone else's game.", ephemeral: true });
         }
 

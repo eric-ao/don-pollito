@@ -27,6 +27,21 @@ async function initDatabase() {
           chips_lost INTEGER DEFAULT 0
         )
     `);
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS slots_stats (
+            user_id TEXT PRIMARY KEY,
+            games_played INTEGER DEFAULT 0,
+            chips_won INTEGER DEFAULT 0,
+            chips_lost INTEGER DEFAULT 0
+        )
+    `);
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS slots_machines  (
+            id TEXT PRIMARY KEY,
+            jackpot INTEGER NOT NULL,
+            jackpot_weight INTEGER DEFAULT 100
+        );
+    `)
 
 
     db.addChips = async (userId, amount) => {
@@ -70,6 +85,27 @@ async function initDatabase() {
 
     db.getStats = async (game, userId) => {
         return db.get(`SELECT * FROM ${game}_stats WHERE user_id = ?`, [userId])
+    }
+
+    db.getJackpot = async (slotId, initialValue) => {
+        const row = await db.get('SELECT jackpot FROM slots_machines WHERE id = ?', [slotId]);
+        if (row) return parseInt(row.jackpot);
+
+        await db.run('INSERT INTO slots_machines (id, jackpot) VALUES (?, ?)', [slotId, initialValue]);
+        return initialValue;
+    }
+
+    db.setJackpot = async (slotId, value) => {
+        await db.run('UPDATE slots_machines SET jackpot = ? WHERE id = ?', [value, slotId]);
+    }
+
+    db.getJackpotWeight = async (slotId) => {
+        const row = await db.get('SELECT jackpot_weight FROM slots_machines WHERE id = ?', [slotId]);
+        return row ? parseInt(row.jackpot_weight) : 1;
+    }
+
+    db.setJackpotWeight = async (slotId, weight) => {
+        await db.run('UPDATE slots_machines SET jackpot_weight = ? WHERE id = ?', [weight, slotId])
     }
 
 
