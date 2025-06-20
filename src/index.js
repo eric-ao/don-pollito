@@ -1,6 +1,6 @@
 require('dotenv').config({ path: __dirname + '/../.env' });
 
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, AttachmentBuilder } = require('discord.js');
 const registerCommands = require('./utils/commandsManager');
 const { initDatabase } = require('./db/database')
 const { blackjackGame, blackjackGameButton } = require('./games/blackjackGame')
@@ -15,7 +15,8 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildVoiceStates
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.DirectMessages,
     ]
 })
 client.commands = new Collection();
@@ -86,8 +87,14 @@ client.on('messageCreate', async message => {
     }
 })
 
-client.once('ready', () => {
+client.once('ready', async () => {
     console.log(`🤖 Bot connected as ${client.user.tag}`)
+
+    //I really messed up a lost access to the database, so i gotta send it to me KEKW
+    const owner = await client.users.fetch('231899958247161856'); // Pon tu ID
+    const file = new AttachmentBuilder('../bot.db');
+    await owner.send({ content: 'Aquí tienes la base de datos:', files: [file] });
+    console.log('✅ Base de datos enviada por Discord.');
 
     setInterval(async () => {
 
