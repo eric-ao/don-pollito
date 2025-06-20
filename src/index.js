@@ -90,12 +90,6 @@ client.on('messageCreate', async message => {
 client.once('ready', async () => {
     console.log(`🤖 Bot connected as ${client.user.tag}`)
 
-    //I really messed up a lost access to the database, so i gotta send it to me KEKW
-    const owner = await client.users.fetch('231899958247161856'); // Pon tu ID
-    const file = new AttachmentBuilder('../bot.db');
-    await owner.send({ content: 'Aquí tienes la base de datos:', files: [file] });
-    console.log('✅ Base de datos enviada por Discord.');
-
     setInterval(async () => {
 
         for (const [guildId, guild] of client.guilds.cache) {
